@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>観相 — AI人相鑑定</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E1016;
+    --ink-2:#171B27;
+    --ink-3:#202637;
+    --gold:#C9A227;
+    --gold-soft:#E2C766;
+    --ivory:#F1EBDC;
+    --muted:#9A9282;
+    --shu:#C8443A;        /* 朱 — 印・CTA */
+    --line:rgba(201,162,39,0.22);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  body{
+    font-family:"Noto Sans JP",system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 700px at 50% -10%, #1a2032 0%, transparent 60%),
+      var(--ink);
+    color:var(--ivory);
+    line-height:1.8;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+
+  /* ---------- Hero ---------- */
+  header.hero{
+    text-align:center;
+    padding:72px 24px 40px;
+    position:relative;
+  }
+  .eyebrow{
+    font-family:"Shippori Mincho",serif;
+    letter-spacing:.55em;
+    font-size:13px;
+    color:var(--gold);
+    padding-left:.55em;
+    margin-bottom:22px;
+  }
+  h1.title{
+    font-family:"Shippori Mincho",serif;
+    font-weight:800;
+    font-size:clamp(48px,11vw,92px);
+    letter-spacing:.18em;
+    line-height:1;
+    padding-left:.18em;
+    background:linear-gradient(180deg,var(--gold-soft),var(--gold) 70%,#8c6f1a);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin-bottom:18px;
+  }
+  .lede{
+    font-family:"Shippori Mincho",serif;
+    font-size:clamp(15px,2.5vw,19px);
+    color:var(--ivory);
+    opacity:.82;
+    max-width:30em;
+    margin:0 auto;
+  }
+  .lede .small{display:block;font-size:13px;color:var(--muted);margin-top:14px;font-family:"Noto Sans JP",sans-serif}
+
+  /* ---------- Stage ---------- */
+  main{padding-bottom:80px}
+
+  .stage{
+    background:linear-gradient(180deg,var(--ink-2),var(--ink));
+    border:1px solid var(--line);
+    border-radius:6px;
+    margin-top:34px;
+    overflow:hidden;
+  }
+
+  /* upload */
+  .uploader{
+    padding:56px 28px;
+    text-align:center;
+  }
+  .privacy{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:7px 16px;
+    margin-bottom:30px;
+  }
+  .privacy b{color:var(--gold-soft);font-weight:500}
+
+  .drop{
+    border:1px dashed rgba(201,162,39,.4);
+    border-radius:4px;
+    padding:46px 24px;
+    max-width:460px;
+    margin:0 auto;
+    transition:border-color .2s, background .2s;
+    cursor:pointer;
+  }
+  .drop:hover,.drop:focus-visible,.drop.over{
+    border-color:var(--gold);
+    background:rgba(201,162,39,.05);
+    outline:none;
+  }
+  .drop .ring{
+    width:64px;height:64px;border-radius:50%;
+    border:1px solid var(--gold);
+    display:grid;place-items:center;
+    margin:0 auto 18px;
+    color:var(--gold);font-size:26px;
+  }
+  .drop h2{font-family:"Shippori Mincho",serif;font-weight:700;font-size:19px;letter-spacing:.04em;margin-bottom:6px}
+  .drop p{font-size:13px;color:var(--muted)}
+  input[type=file]{display:none}
+
+  .status{margin-top:22px;font-size:13px;color:var(--gold-soft);min-height:20px}
+  .status.err{color:#E58A82}
+
+  /* ---------- Result layout ---------- */
+  .result{display:none;grid-template-columns:1fr 1fr;gap:0}
+  .result.show{display:grid}
+  @media(max-width:760px){.result.show{grid-template-columns:1fr}}
+
+  .portrait{
+    position:relative;
+    background:#06070b;
+    border-right:1px solid var(--line);
+    display:grid;place-items:center;
+    min-height:340px;
+    overflow:hidden;
+  }
+  @media(max-width:760px){.portrait{border-right:none;border-bottom:1px solid var(--line)}}
+  .portrait canvas{max-width:100%;max-height:520px;display:block}
+
+  /* scan line */
+  .scan{
+    position:absolute;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+    box-shadow:0 0 16px 2px rgba(201,162,39,.6);
+    top:0;opacity:0;
+  }
+  .scanning .scan{animation:scan 1.5s ease-in-out infinite;opacity:1}
+  @keyframes scan{0%{top:6%}50%{top:94%}100%{top:6%}}
+
+  /* seal */
+  .seal{
+    position:absolute;right:16px;bottom:16px;
+    width:74px;height:74px;border-radius:50%;
+    border:2.5px solid var(--shu);
+    color:var(--shu);
+    font-family:"Shippori Mincho",serif;font-weight:800;
+    display:grid;place-items:center;
+    font-size:15px;letter-spacing:.05em;
+    line-height:1.25;text-align:center;
+    background:rgba(200,68,58,.07);
+    transform:scale(0) rotate(-22deg);
+    opacity:0;
+  }
+  .sealed .seal{animation:stamp .5s cubic-bezier(.2,1.4,.5,1) forwards}
+  @keyframes stamp{to{transform:scale(1) rotate(-9deg);opacity:1}}
+
+  .reading{padding:34px 30px 30px}
+
+  .kicker{
+    font-family:"Shippori Mincho",serif;
+    color:var(--gold);letter-spacing:.3em;font-size:12px;
+    padding-left:.3em;margin-bottom:14px;
+  }
+  .trait{
+    font-family:"Shippori Mincho",serif;
+    font-weight:800;
+    font-size:clamp(26px,4.4vw,34px);
+    line-height:1.35;
+    margin-bottom:16px;
+  }
+  .trait .hl{color:var(--gold-soft)}
+  .trait-body{font-size:15px;color:var(--ivory);opacity:.9;margin-bottom:14px}
+  .from{
+    font-size:12px;color:var(--muted);
+    border-top:1px solid var(--line);padding-top:14px;
+  }
+  .from b{color:var(--gold-soft);font-weight:500}
+
+  /* ---------- Paywall ---------- */
+  .paywall{
+    border-top:1px solid var(--line);
+    padding:34px 30px 40px;
+    position:relative;
+  }
+  .paywall .kicker{color:var(--shu)}
+  .pw-head{font-family:"Shippori Mincho",serif;font-weight:700;font-size:20px;line-height:1.5;margin-bottom:20px}
+
+  .locked{position:relative;border-radius:4px;overflow:hidden}
+  .locked-inner{
+    filter:blur(7px);
+    user-select:none;pointer-events:none;
+    opacity:.75;
+  }
+  .weak{display:flex;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:4px;margin-bottom:12px;background:var(--ink-3)}
+  .weak .no{font-family:"Shippori Mincho",serif;color:var(--shu);font-weight:800;font-size:22px;line-height:1.2}
+  .weak h4{font-family:"Shippori Mincho",serif;font-size:16px;margin-bottom:4px}
+  .weak p{font-size:13.5px;color:var(--muted)}
+
+  .lock-veil{
+    position:absolute;inset:0;
+    display:grid;place-items:center;
+    background:linear-gradient(180deg,rgba(14,16,22,.2),rgba(14,16,22,.78));
+  }
+  .lock-card{text-align:center;padding:0 20px}
+  .lock-card .ic{font-size:28px;margin-bottom:8px}
+  .lock-card p{font-family:"Shippori Mincho",serif;font-size:15px;letter-spacing:.04em}
+
+  /* ---------- Plans ---------- */
+  .plans{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px}
+  @media(max-width:540px){.plans{grid-template-columns:1fr}}
+  .plan{
+    border:1px solid var(--line);border-radius:5px;
+    padding:22px 20px;background:var(--ink-2);
+    display:flex;flex-direction:column;
+  }
+  .plan.feature{border-color:var(--gold);box-shadow:0 0 0 1px rgba(201,162,39,.25) inset}
+  .plan .tag{font-size:11px;letter-spacing:.2em;color:var(--gold);margin-bottom:10px}
+  .plan h3{font-family:"Shippori Mincho",serif;font-size:18px;margin-bottom:6px}
+  .plan .price{font-family:"Shippori Mincho",serif;font-size:30px;font-weight:800;margin-bottom:4px}
+  .plan .price small{font-size:13px;font-weight:500;color:var(--muted)}
+  .plan ul{list-style:none;font-size:13px;color:var(--muted);margin:12px 0 20px;flex:1}
+  .plan li{padding-left:18px;position:relative;margin-bottom:7px}
+  .plan li::before{content:"—";position:absolute;left:0;color:var(--gold)}
+
+  .btn{
+    font-family:"Shippori Mincho",serif;font-weight:700;
+    border:none;border-radius:4px;cursor:pointer;
+    padding:13px 18px;font-size:15px;letter-spacing:.05em;
+    transition:transform .1s, filter .2s;width:100%;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-gold{background:linear-gradient(180deg,var(--gold-soft),var(--gold));color:#241c00}
+  .btn-gold:hover{filter:brightness(1.06)}
+  .btn-shu{background:var(--shu);color:#fff}
+  .btn-shu:hover{filter:brightness(1.08)}
+  .btn:focus-visible{outline:2px solid var(--gold-soft);outline-offset:2px}
+
+  .restart{display:block;margin:28px auto 0;background:none;border:1px solid var(--line);color:var(--muted);font-family:"Noto Sans JP";font-size:13px;border-radius:999px;padding:10px 22px;cursor:pointer;width:auto}
+  .restart:hover{color:var(--ivory);border-color:var(--gold)}
+
+  /* ---------- Modal ---------- */
+  .modal-bg{position:fixed;inset:0;background:rgba(6,7,11,.72);display:none;place-items:center;padding:24px;z-index:50}
+  .modal-bg.show{display:grid}
+  .modal{background:var(--ink-2);border:1px solid var(--gold);border-radius:6px;max-width:380px;padding:30px;text-align:center}
+  .modal .ic{font-size:30px;color:var(--gold);margin-bottom:12px}
+  .modal h3{font-family:"Shippori Mincho",serif;font-size:20px;margin-bottom:12px}
+  .modal p{font-size:13.5px;color:var(--muted);margin-bottom:8px}
+  .modal .close{margin-top:18px;background:none;border:1px solid var(--line);color:var(--ivory);border-radius:4px;padding:10px 24px;cursor:pointer;font-family:"Noto Sans JP";width:auto}
+  .modal .close:hover{border-color:var(--gold)}
+
+  /* ---------- Footer ---------- */
+  footer{border-top:1px solid var(--line);padding:30px 24px 50px;text-align:center}
+  footer p{font-size:11.5px;color:var(--muted);max-width:40em;margin:0 auto;line-height:1.7}
+
+  @media(prefers-reduced-motion:reduce){
+    .scanning .scan,.sealed .seal{animation:none}
+    .sealed .seal{transform:scale(1) rotate(-9deg);opacity:1}
+    .scanning .scan{opacity:.6;top:50%}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="eyebrow">人 相 鑑 定</div>
+  <h1 class="title">観相</h1>
+  <p class="lede">
+    あなたの顔には、まだ言葉になっていない強みが宿っています。
+    <span class="small">AIが顔の478点を測り、その人だけの一相を読み解きます。</span>
+  </p>
+</header>
+
+<main class="wrap">
+  <section class="stage" id="stage">
+
+    <!-- Upload -->
+    <div class="uploader" id="uploader">
+      <div class="privacy">📵 <span>写真は<b>あなたの端末の中だけ</b>で解析され、サーバーには送信・保存されません</span></div>
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="顔写真を選ぶ">
+        <div class="ring">⊙</div>
+        <h2>顔写真を選んで鑑定する</h2>
+        <p>正面・明るい場所で写したものが最も正確です</p>
+      </div>
+      <input type="file" id="file" accept="image/*">
+      <div class="status" id="status"></div>
+    </div>
+
+    <!-- Result -->
+    <div class="result" id="result">
+      <div class="portrait" id="portrait">
+        <canvas id="canvas"></canvas>
+        <div class="scan"></div>
+        <div class="seal">鑑定済</div>
+      </div>
+      <div class="reading">
+        <div class="kicker">あなたの最大の強み</div>
+        <h2 class="trait" id="traitTitle"></h2>
+        <p class="trait-body" id="traitBody"></p>
+        <p class="from" id="traitFrom"></p>
+      </div>
+    </div>
+
+    <!-- Paywall -->
+    <div class="paywall" id="paywall" style="display:none">
+      <div class="kicker">人生の転機を分ける所</div>
+      <p class="pw-head">あなたの相には、転機となる<b style="color:var(--shu)">2つの弱点</b>と、<br>それを強みに変える<b style="color:var(--gold-soft)">開運の鍵</b>が隠れています。</p>
+
+      <div class="locked">
+        <div class="locked-inner" id="lockedInner"></div>
+        <div class="lock-veil">
+          <div class="lock-card">
+            <div class="ic">🔒</div>
+            <p>詳細レポートはプレミアム鑑定で解放されます</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="plans">
+        <div class="plan feature">
+          <div class="tag">月額・サブスク</div>
+          <h3>毎月の顔相予報</h3>
+          <div class="price">¥480<small>／月</small></div>
+          <ul>
+            <li>今月の開運ポイント</li>
+            <li>表情・メイクの実践レッスン</li>
+            <li>弱点を補う毎日の習慣</li>
+          </ul>
+          <button class="btn btn-gold" data-plan="月額サブスク">この鑑定を続ける</button>
+        </div>
+        <div class="plan">
+          <div class="tag">都度・買い切り</div>
+          <h3>詳細PDFレポート</h3>
+          <div class="price">¥500<small>／回</small></div>
+          <ul>
+            <li>2つの弱点を全文公開</li>
+            <li>あなた専用の開運法</li>
+            <li>保存できるPDF出力</li>
+          </ul>
+          <button class="btn btn-shu" data-plan="都度課金（PDF）">レポートを受け取る</button>
+        </div>
+      </div>
+
+      <button class="restart" id="restart">別の写真で鑑定し直す</button>
+    </div>
+
+  </section>
+</main>
+
+<footer>
+  <p>本サービスはエンタメ目的の人相鑑定です。性格・運勢・能力・将来を科学的に保証するものではありません。診断結果は娯楽としてお楽しみください。アップロードした写真は端末内でのみ処理され、外部に送信・保存されません。</p>
+</footer>
+
+<!-- Payment mock modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="ic">✦</div>
+    <h3 id="modalTitle">決済へ進みます</h3>
+    <p>ここに決済（Stripe など）の画面が入ります。</p>
+    <p>これは <b style="color:var(--gold-soft)">MVPのデモ</b> のため、実際の課金は発生しません。</p>
+    <button class="close" id="modalClose">閉じる</button>
+  </div>
+</div>
+
+<script type="module">
+import {
+  FaceLandmarker, FilesetResolver, DrawingUtils
+} from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10/vision_bundle.mjs";
+
+const $ = id => document.getElementById(id);
+const statusEl = $("status");
+
+let landmarker = null;
+
+/* ---------- 1. モデル読み込み ---------- */
+async function loadModel(){
+  statusEl.classList.remove("err");
+  statusEl.textContent = "鑑定エンジンを読み込み中…";
+  try{
+    const fileset = await FilesetResolver.forVisionTasks(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10/wasm"
+    );
+    landmarker = await FaceLandmarker.createFromOptions(fileset, {
+      baseOptions:{
+        modelAssetPath:"https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+        delegate:"CPU"
+      },
+      runningMode:"IMAGE",
+      numFaces:1
+    });
+    statusEl.textContent = "準備ができました。顔写真を選んでください。";
+  }catch(e){
+    console.error(e);
+    statusEl.classList.add("err");
+    statusEl.textContent = "エンジンを読み込めませんでした。file:// で開いている場合は、ローカルサーバー（VS Code の Live Server など）か GitHub Pages 上で開いてください。";
+  }
+}
+loadModel();
+
+/* ---------- 2. 入力 ---------- */
+const drop = $("drop"), fileInput = $("file");
+drop.addEventListener("click", ()=>fileInput.click());
+drop.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();fileInput.click();} });
+["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop", e=>{ const f=e.dataTransfer.files[0]; if(f) handleFile(f); });
+fileInput.addEventListener("change", e=>{ const f=e.target.files[0]; if(f) handleFile(f); });
+
+function handleFile(file){
+  if(!landmarker){ statusEl.classList.add("err"); statusEl.textContent="エンジンの準備がまだです。少し待ってから再度お試しください。"; return; }
+  if(!file.type.startsWith("image/")){ statusEl.classList.add("err"); statusEl.textContent="画像ファイルを選んでください。"; return; }
+  const img = new Image();
+  img.onload = ()=>analyze(img);
+  img.onerror = ()=>{ statusEl.classList.add("err"); statusEl.textContent="画像を読み込めませんでした。"; };
+  img.src = URL.createObjectURL(file);
+}
+
+/* ---------- 3. 解析 ---------- */
+const canvas = $("canvas"), portrait = $("portrait");
+
+function analyze(img){
+  const res = landmarker.detect(img);
+  if(!res.faceLandmarks || res.faceLandmarks.length === 0){
+    statusEl.classList.add("err");
+    statusEl.textContent = "顔を検出できませんでした。正面で明るく写った写真をお試しください。";
+    return;
+  }
+  const lm = res.faceLandmarks[0];
+
+  // 画像とメッシュを描画
+  const W = img.naturalWidth, H = img.naturalHeight;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img,0,0,W,H);
+  ctx.fillStyle = "rgba(6,7,11,0.45)";
+  ctx.fillRect(0,0,W,H);
+
+  const feat = computeFeatures(lm,W,H);
+  const ranked = rankTraits(feat);
+  const headline = ranked[0];
+  const locked = ranked.slice(1,3);
+
+  drawMesh(ctx, lm, headline.region);
+  renderReading(headline);
+  renderLocked(locked);
+
+  // 表示切り替え＋演出
+  $("uploader").style.display = "none";
+  $("result").classList.add("show");
+  $("paywall").style.display = "block";
+  portrait.classList.add("scanning");
+  setTimeout(()=>{
+    portrait.classList.remove("scanning");
+    portrait.classList.add("sealed");
+  }, 1500);
+}
+
+/* ---------- 4. 特徴量（顔幅などで正規化） ---------- */
+function computeFeatures(lm,W,H){
+  const P = i => ({x:lm[i].x*W, y:lm[i].y*H});
+  const d = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
+
+  const faceW = d(P(234),P(454));
+  const faceH = d(P(10),P(152));
+  const eyeWL = d(P(33),P(133));
+  const interocular = d(P(133),P(362));
+  const eyeOpenL = d(P(159),P(145));
+  const eyeOpenR = d(P(386),P(374));
+  const mouthW = d(P(61),P(291));
+  const browGap = ((P(159).y - P(105).y) + (P(386).y - P(334).y)) / 2;
+
+  // 左右対称性
+  const cx = (P(234).x + P(454).x)/2;
+  const pairs = [[33,263],[61,291],[105,334],[133,362],[234,454]];
+  let asym = 0;
+  for(const [l,r] of pairs){
+    asym += Math.abs((cx - P(l).x) - (P(r).x - cx));
+  }
+  asym = asym / pairs.length / faceW;
+
+  return {
+    faceRatio: faceW / faceH,
+    eyeSpacing: interocular / faceW,
+    eyeOpenness: ((eyeOpenL+eyeOpenR)/2) / eyeWL,
+    mouthWidth: mouthW / faceW,
+    browGap: browGap / faceH,
+    symmetry: 1 - asym
+  };
+}
+
+/* ---------- 5. 相のテンプレート ---------- */
+const TRAITS = {
+  faceRatio:{ region:"face", mid:0.745, spread:0.05,
+    high:{ s:["人を安心させる「場を和ませる才能」","初対面でも相手の警戒をふっとほどく、丸みのある輪郭。あなたが居るだけで、その場の空気はやわらかくなります。"],
+            w:["頼られると断れず、つい抱え込みがち","「いい人」でいようとして、自分の予定を後回しにしていませんか。"],
+            f:"月に一度、何の予定も入れない「自分の日」を先に決めておきましょう。" },
+    low:{ s:["物事を深く考え抜く「思索家の知性」","縦に伸びた端正な輪郭は、表層で満足せず本質まで掘り下げる人の相。あなたの言葉には重みが宿ります。"],
+           w:["考えすぎて、一歩目が遅れがち","熟考の長所が、ときに「機会を逃す」という形で出てしまいます。"],
+           f:"迷ったら3秒で決める——小さな決断から「即断の筋肉」を鍛えましょう。" } },
+
+  eyeSpacing:{ region:"eyes", mid:0.355, spread:0.04,
+    high:{ s:["細部にとらわれない「大局観」","目と目の間にゆとりがある人は、視野が広く、全体像から未来を描ける戦略家。木ではなく森を見る目を持っています。"],
+            w:["興味が広がりすぎて、詰めが甘くなる","面白いものが多すぎて、一つを最後までやり切る前に次へ向かいがち。"],
+            f:"毎朝「今日やる3つ」だけを紙に書き、それ以外は明日に回しましょう。" },
+    low:{ s:["一点を磨き上げる「職人気質の精度」","目の間隔がきゅっと締まった相は、集中力と没入の人。あなたが本気を出した仕事は、細部まで美しく仕上がります。"],
+           w:["視野が狭まり、一人で抱え込みやすい","集中するほど周りが見えなくなり、助けを求めそびれることがあります。"],
+           f:"週に一度、進み具合を誰かに話す「報告の時間」を作りましょう。" } },
+
+  eyeOpenness:{ region:"eyes", mid:0.30, spread:0.06,
+    high:{ s:["人を惹きつける「豊かな表現力」","大きく開いた目は、感情がそのまま輝きになる相。あなたの喜怒哀楽は、不思議と周りの心を動かします。"],
+            w:["感受性が強く、人混みや刺激で気疲れしやすい","受け取る情報量が多いぶん、知らぬ間に消耗していることがあります。"],
+            f:"夜は早めに画面を閉じ、目と心を休める時間を確保しましょう。" },
+    low:{ s:["物事を冷静に見極める「クールな観察眼」","切れ長の目は、感情に流されず本質を見抜く相。あなたの判断は、いざという場面で頼りにされます。"],
+           w:["本心が伝わりにくく、誤解されることがある","落ち着きが「冷たい」と取られ、損をしている場面があるかも。"],
+           f:"一日一回、思っていることを言葉にして相手に渡してみましょう。" } },
+
+  mouthWidth:{ region:"mouth", mid:0.43, spread:0.05,
+    high:{ s:["周囲を巻き込む「行動力とリーダーシップ」","横に広い口は、声と意志で人を動かす相。あなたが「やろう」と言えば、自然と人が集まってきます。"],
+            w:["勢いで動き、あとから調整に追われがち","スピードが武器な反面、走り出してから「あれ?」となることも。"],
+            f:"動き出す前に一晩寝かせる——大事な決定だけは翌朝に判断を。" },
+    low:{ s:["言葉を選ぶ「誠実さと聞き上手」","小さく結ばれた口は、軽々しく口を開かない信頼の相。あなたの一言には、嘘がないと相手が感じます。"],
+           w:["遠慮して、自分の意見を後回しにしがち","「出しゃばらない」が過ぎて、正しい意見が埋もれることがあります。"],
+           f:"会議では最初の一言を担当する——口火を切る役を引き受けましょう。" } },
+
+  browGap:{ region:"eyes", mid:0.075, spread:0.025,
+    high:{ s:["何があっても動じない「穏やかな包容力」","眉と目の間にゆとりがある相は、感情の波が静かで、人の拠りどころになれる人。隣にいるだけで安心されます。"],
+            w:["のんびりして、好機を逃すことがある","余裕が「先延ばし」に化けてしまう瞬間があります。"],
+            f:"気になったことは、その日のうちに一歩だけ進めておきましょう。" },
+    low:{ s:["やり遂げる「強い意志と集中力」","眉が目に近い相は、一度決めたら最後までやり抜く芯の強さ。あなたの本気は、周囲を黙らせる力があります。"],
+           w:["自分にも他人にも、つい厳しくなりがち","高い基準が、気疲れや衝突の原因になることがあります。"],
+           f:"一日の終わりに、自分を褒める言葉を一つ書き残しましょう。" } },
+
+  symmetry:{ region:"face", mid:0.965, spread:0.03,
+    high:{ s:["バランス感覚に優れた「信頼される安定感」","左右の整った相は、極端に振れず筋を通せる人。あなたの判断は「あの人が言うなら」と信頼を集めます。"],
+            w:["無難を選び、冒険を避けがち","安定を守るあまり、大きく跳ねる機会を見送ることがあります。"],
+            f:"月に一度、結果の読めない「初めて」に挑戦してみましょう。" },
+    low:{ s:["型にはまらない「独創的な発想力」","左右で表情の異なる相は、人と同じ発想に収まらない個性の証。あなたのアイデアには、他にない角度があります。"],
+           w:["気分の波が、成果のムラに出やすい","乗っている時とそうでない時の差が、結果に表れがちです。"],
+           f:"調子の良い時間帯を見つけ、大事な仕事をそこに寄せましょう。" } }
+};
+
+const REGION_LABEL = { face:"顔の輪郭と全体のバランス", eyes:"両目とその周辺", mouth:"口もとの形" };
+
+function rankTraits(feat){
+  const out = [];
+  for(const key in TRAITS){
+    const t = TRAITS[key];
+    const dev = (feat[key] - t.mid) / t.spread;   // 平均からのズレ
+    const pole = dev >= 0 ? t.high : t.low;
+    out.push({ key, region:t.region, dev:Math.abs(dev), pole });
+  }
+  out.sort((a,b)=>b.dev - a.dev);
+  return out;
+}
+
+/* ---------- 6. 描画（メッシュ） ---------- */
+function drawMesh(ctx, lm, region){
+  const du = new DrawingUtils(ctx);
+  du.drawConnectors(lm, FaceLandmarker.FACE_LANDMARKS_TESSELATION,
+    { color:"rgba(201,162,39,0.18)", lineWidth:0.6 });
+
+  const bright = { color:"rgba(226,199,102,0.95)", lineWidth:1.6 };
+  if(region==="eyes"){
+    [FaceLandmarker.FACE_LANDMARKS_LEFT_EYE, FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE,
+     FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW, FaceLandmarker.FACE_LANDMARKS_RIGHT_EYEBROW]
+      .forEach(c=>du.drawConnectors(lm,c,bright));
+  }else if(region==="mouth"){
+    du.drawConnectors(lm, FaceLandmarker.FACE_LANDMARKS_LIPS, bright);
+  }else{
+    du.drawConnectors(lm, FaceLandmarker.FACE_LANDMARKS_FACE_OVAL, bright);
+  }
+}
+
+/* ---------- 7. 結果の描画 ---------- */
+function renderReading(h){
+  $("traitTitle").innerHTML = `<span class="hl">${h.pole.s[0]}</span>`;
+  $("traitBody").textContent = h.pole.s[1];
+  $("traitFrom").innerHTML = `読み取った相 — <b>${REGION_LABEL[h.region]}</b>`;
+}
+
+function renderLocked(list){
+  $("lockedInner").innerHTML = list.map((t,i)=>`
+    <div class="weak">
+      <div class="no">${i+1}</div>
+      <div>
+        <h4>${t.pole.w[0]}</h4>
+        <p>${t.pole.w[1]}　開運の鍵：${t.pole.f}</p>
+      </div>
+    </div>`).join("");
+}
+
+/* ---------- 8. 課金モック ---------- */
+const modalBg = $("modalBg");
+document.querySelectorAll("[data-plan]").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    $("modalTitle").textContent = `${b.dataset.plan} へ進みます`;
+    modalBg.classList.add("show");
+  });
+});
+$("modalClose").addEventListener("click", ()=>modalBg.classList.remove("show"));
+modalBg.addEventListener("click", e=>{ if(e.target===modalBg) modalBg.classList.remove("show"); });
+
+/* ---------- 9. やり直し ---------- */
+$("restart").addEventListener("click", ()=>{
+  $("result").classList.remove("show");
+  $("paywall").style.display = "none";
+  portrait.classList.remove("scanning","sealed");
+  $("uploader").style.display = "block";
+  fileInput.value = "";
+  statusEl.classList.remove("err");
+  statusEl.textContent = "準備ができました。顔写真を選んでください。";
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+</script>
+</body>
+</html>
