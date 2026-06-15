@@ -185,9 +185,9 @@
   }
   .trait .hl{color:var(--gold-soft)}
   .trait-body{font-size:15px;color:var(--ivory);opacity:.9;margin-bottom:14px}
-  .from{
-    font-size:12px;color:var(--muted);
-    border-top:1px solid var(--line);padding-top:14px;
+  .overview{
+    font-size:13px;color:var(--muted);
+    border-top:1px solid var(--line);padding-top:14px;margin-top:10px;
   }
   .from b{color:var(--gold-soft);font-weight:500}
 
@@ -308,17 +308,17 @@
         <div class="seal">鑑定済</div>
       </div>
       <div class="reading">
-        <div class="kicker">あなたの最大の強み</div>
+        <div class="kicker" id="traitTerm"></div>
         <h2 class="trait" id="traitTitle"></h2>
         <p class="trait-body" id="traitBody"></p>
-        <p class="from" id="traitFrom"></p>
+        <p class="overview" id="traitOverview"></p>
       </div>
     </div>
 
     <!-- Paywall -->
     <div class="paywall" id="paywall" style="display:none">
       <div class="kicker">人生の転機を分ける所</div>
-      <p class="pw-head">あなたの相には、転機となる<b style="color:var(--shu)">2つの弱点</b>と、<br>それを強みに変える<b style="color:var(--gold-soft)">開運の鍵</b>が隠れています。</p>
+      <p class="pw-head">あなたの相には、転機となる<b style="color:var(--shu)">3つの弱点</b>と、<br>それを強みに変える<b style="color:var(--gold-soft)">開運の鍵</b>が隠れています。</p>
 
       <div class="locked">
         <div class="locked-inner" id="lockedInner"></div>
@@ -377,6 +377,7 @@
 </div>
 
 <script type="module">
+import { analyzeFace } from "./readings.js";
 import {
   FaceLandmarker, FilesetResolver, DrawingUtils
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10/vision_bundle.mjs";
@@ -449,14 +450,10 @@ function analyze(img){
   ctx.fillStyle = "rgba(6,7,11,0.45)";
   ctx.fillRect(0,0,W,H);
 
-  const feat = computeFeatures(lm,W,H);
-  const ranked = rankTraits(feat);
-  const headline = ranked[0];
-  const locked = ranked.slice(1,3);
-
-  drawMesh(ctx, lm, headline.region);
-  renderReading(headline);
-  renderLocked(locked);
+  const report = analyzeFace(lm, W, H);
+  drawMesh(ctx, lm, termToRegion(report.headline.term));
+  renderReading(report.headline, report.overview);
+  renderLocked(report.locked);
 
   // 表示切り替え＋演出
   $("uploader").style.display = "none";
@@ -469,102 +466,11 @@ function analyze(img){
   }, 1500);
 }
 
-/* ---------- 4. 特徴量（顔幅などで正規化） ---------- */
-function computeFeatures(lm,W,H){
-  const P = i => ({x:lm[i].x*W, y:lm[i].y*H});
-  const d = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
 
-  const faceW = d(P(234),P(454));
-  const faceH = d(P(10),P(152));
-  const eyeWL = d(P(33),P(133));
-  const interocular = d(P(133),P(362));
-  const eyeOpenL = d(P(159),P(145));
-  const eyeOpenR = d(P(386),P(374));
-  const mouthW = d(P(61),P(291));
-  const browGap = ((P(159).y - P(105).y) + (P(386).y - P(334).y)) / 2;
-
-  // 左右対称性
-  const cx = (P(234).x + P(454).x)/2;
-  const pairs = [[33,263],[61,291],[105,334],[133,362],[234,454]];
-  let asym = 0;
-  for(const [l,r] of pairs){
-    asym += Math.abs((cx - P(l).x) - (P(r).x - cx));
-  }
-  asym = asym / pairs.length / faceW;
-
-  return {
-    faceRatio: faceW / faceH,
-    eyeSpacing: interocular / faceW,
-    eyeOpenness: ((eyeOpenL+eyeOpenR)/2) / eyeWL,
-    mouthWidth: mouthW / faceW,
-    browGap: browGap / faceH,
-    symmetry: 1 - asym
-  };
-}
-
-/* ---------- 5. 相のテンプレート ---------- */
-const TRAITS = {
-  faceRatio:{ region:"face", mid:0.745, spread:0.05,
-    high:{ s:["人を安心させる「場を和ませる才能」","初対面でも相手の警戒をふっとほどく、丸みのある輪郭。あなたが居るだけで、その場の空気はやわらかくなります。"],
-            w:["頼られると断れず、つい抱え込みがち","「いい人」でいようとして、自分の予定を後回しにしていませんか。"],
-            f:"月に一度、何の予定も入れない「自分の日」を先に決めておきましょう。" },
-    low:{ s:["物事を深く考え抜く「思索家の知性」","縦に伸びた端正な輪郭は、表層で満足せず本質まで掘り下げる人の相。あなたの言葉には重みが宿ります。"],
-           w:["考えすぎて、一歩目が遅れがち","熟考の長所が、ときに「機会を逃す」という形で出てしまいます。"],
-           f:"迷ったら3秒で決める——小さな決断から「即断の筋肉」を鍛えましょう。" } },
-
-  eyeSpacing:{ region:"eyes", mid:0.355, spread:0.04,
-    high:{ s:["細部にとらわれない「大局観」","目と目の間にゆとりがある人は、視野が広く、全体像から未来を描ける戦略家。木ではなく森を見る目を持っています。"],
-            w:["興味が広がりすぎて、詰めが甘くなる","面白いものが多すぎて、一つを最後までやり切る前に次へ向かいがち。"],
-            f:"毎朝「今日やる3つ」だけを紙に書き、それ以外は明日に回しましょう。" },
-    low:{ s:["一点を磨き上げる「職人気質の精度」","目の間隔がきゅっと締まった相は、集中力と没入の人。あなたが本気を出した仕事は、細部まで美しく仕上がります。"],
-           w:["視野が狭まり、一人で抱え込みやすい","集中するほど周りが見えなくなり、助けを求めそびれることがあります。"],
-           f:"週に一度、進み具合を誰かに話す「報告の時間」を作りましょう。" } },
-
-  eyeOpenness:{ region:"eyes", mid:0.30, spread:0.06,
-    high:{ s:["人を惹きつける「豊かな表現力」","大きく開いた目は、感情がそのまま輝きになる相。あなたの喜怒哀楽は、不思議と周りの心を動かします。"],
-            w:["感受性が強く、人混みや刺激で気疲れしやすい","受け取る情報量が多いぶん、知らぬ間に消耗していることがあります。"],
-            f:"夜は早めに画面を閉じ、目と心を休める時間を確保しましょう。" },
-    low:{ s:["物事を冷静に見極める「クールな観察眼」","切れ長の目は、感情に流されず本質を見抜く相。あなたの判断は、いざという場面で頼りにされます。"],
-           w:["本心が伝わりにくく、誤解されることがある","落ち着きが「冷たい」と取られ、損をしている場面があるかも。"],
-           f:"一日一回、思っていることを言葉にして相手に渡してみましょう。" } },
-
-  mouthWidth:{ region:"mouth", mid:0.43, spread:0.05,
-    high:{ s:["周囲を巻き込む「行動力とリーダーシップ」","横に広い口は、声と意志で人を動かす相。あなたが「やろう」と言えば、自然と人が集まってきます。"],
-            w:["勢いで動き、あとから調整に追われがち","スピードが武器な反面、走り出してから「あれ?」となることも。"],
-            f:"動き出す前に一晩寝かせる——大事な決定だけは翌朝に判断を。" },
-    low:{ s:["言葉を選ぶ「誠実さと聞き上手」","小さく結ばれた口は、軽々しく口を開かない信頼の相。あなたの一言には、嘘がないと相手が感じます。"],
-           w:["遠慮して、自分の意見を後回しにしがち","「出しゃばらない」が過ぎて、正しい意見が埋もれることがあります。"],
-           f:"会議では最初の一言を担当する——口火を切る役を引き受けましょう。" } },
-
-  browGap:{ region:"eyes", mid:0.075, spread:0.025,
-    high:{ s:["何があっても動じない「穏やかな包容力」","眉と目の間にゆとりがある相は、感情の波が静かで、人の拠りどころになれる人。隣にいるだけで安心されます。"],
-            w:["のんびりして、好機を逃すことがある","余裕が「先延ばし」に化けてしまう瞬間があります。"],
-            f:"気になったことは、その日のうちに一歩だけ進めておきましょう。" },
-    low:{ s:["やり遂げる「強い意志と集中力」","眉が目に近い相は、一度決めたら最後までやり抜く芯の強さ。あなたの本気は、周囲を黙らせる力があります。"],
-           w:["自分にも他人にも、つい厳しくなりがち","高い基準が、気疲れや衝突の原因になることがあります。"],
-           f:"一日の終わりに、自分を褒める言葉を一つ書き残しましょう。" } },
-
-  symmetry:{ region:"face", mid:0.965, spread:0.03,
-    high:{ s:["バランス感覚に優れた「信頼される安定感」","左右の整った相は、極端に振れず筋を通せる人。あなたの判断は「あの人が言うなら」と信頼を集めます。"],
-            w:["無難を選び、冒険を避けがち","安定を守るあまり、大きく跳ねる機会を見送ることがあります。"],
-            f:"月に一度、結果の読めない「初めて」に挑戦してみましょう。" },
-    low:{ s:["型にはまらない「独創的な発想力」","左右で表情の異なる相は、人と同じ発想に収まらない個性の証。あなたのアイデアには、他にない角度があります。"],
-           w:["気分の波が、成果のムラに出やすい","乗っている時とそうでない時の差が、結果に表れがちです。"],
-           f:"調子の良い時間帯を見つけ、大事な仕事をそこに寄せましょう。" } }
-};
-
-const REGION_LABEL = { face:"顔の輪郭と全体のバランス", eyes:"両目とその周辺", mouth:"口もとの形" };
-
-function rankTraits(feat){
-  const out = [];
-  for(const key in TRAITS){
-    const t = TRAITS[key];
-    const dev = (feat[key] - t.mid) / t.spread;   // 平均からのズレ
-    const pole = dev >= 0 ? t.high : t.low;
-    out.push({ key, region:t.region, dev:Math.abs(dev), pole });
-  }
-  out.sort((a,b)=>b.dev - a.dev);
-  return out;
+function termToRegion(term){
+  if(/目|眉/.test(term)) return "eyes";
+  if(/口|唇/.test(term)) return "mouth";
+  return "face";
 }
 
 /* ---------- 6. 描画（メッシュ） ---------- */
@@ -586,10 +492,11 @@ function drawMesh(ctx, lm, region){
 }
 
 /* ---------- 7. 結果の描画 ---------- */
-function renderReading(h){
-  $("traitTitle").innerHTML = `<span class="hl">${h.pole.s[0]}</span>`;
-  $("traitBody").textContent = h.pole.s[1];
-  $("traitFrom").innerHTML = `読み取った相 — <b>${REGION_LABEL[h.region]}</b>`;
+function renderReading(headline, overview){
+  $("traitTerm").textContent = headline.term;
+  $("traitTitle").innerHTML = `<span class="hl">${headline.title}</span>`;
+  $("traitBody").textContent = headline.body;
+  $("traitOverview").textContent = overview;
 }
 
 function renderLocked(list){
@@ -597,8 +504,8 @@ function renderLocked(list){
     <div class="weak">
       <div class="no">${i+1}</div>
       <div>
-        <h4>${t.pole.w[0]}</h4>
-        <p>${t.pole.w[1]}　開運の鍵：${t.pole.f}</p>
+        <h4>${t.term}</h4>
+        <p>${t.weakness}　開運の鍵：${t.kaiun}</p>
       </div>
     </div>`).join("");
 }
