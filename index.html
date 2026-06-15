@@ -9,15 +9,16 @@
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#FAFAF8;
-    --ink-2:#F2EDE5;
-    --ink-3:#EAE2D5;
-    --gold:#B5614A;
-    --gold-soft:#D4896E;
-    --ivory:#2E2420;
-    --muted:#8A7E76;
-    --shu:#C84B35;
-    --line:rgba(181,97,74,0.2);
+    --ink:#FBFAF7;        /* ベース背景 */
+    --ink-2:#FFFFFF;      /* カード面 */
+    --ink-3:#F5F2EC;      /* 薄背景バリアント */
+    --gold:#E8A0A8;       /* くすみピンクアクセント */
+    --gold-soft:#F2C4CB;  /* ライトピンク */
+    --ivory:#3A3A3A;      /* 本文 */
+    --muted:#7A7570;      /* 補足テキスト */
+    --shu:#BF6878;        /* 強調・CTA（深みローズ）*/
+    --line:#ECE8E1;       /* 罫線 */
+    --accent-2:#A8C6B4;   /* ミントグリーン */
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
@@ -25,7 +26,7 @@
   body{
     font-family:"Noto Sans JP",system-ui,sans-serif;
     background:
-      radial-gradient(1200px 700px at 50% -10%, #F0DDD4 0%, transparent 60%),
+      radial-gradient(1200px 700px at 50% -10%, #F5E8EA 0%, transparent 60%),
       var(--ink);
     color:var(--ivory);
     line-height:1.8;
@@ -56,7 +57,7 @@
     letter-spacing:.18em;
     line-height:1;
     padding-left:.18em;
-    background:linear-gradient(180deg,var(--gold-soft),var(--gold) 70%,#7A2F1E);
+    background:linear-gradient(180deg,var(--gold-soft),var(--gold) 70%,#9A5060);
     -webkit-background-clip:text;
     background-clip:text;
     color:transparent;
@@ -76,16 +77,17 @@
   main{padding-bottom:80px}
 
   .stage{
-    background:linear-gradient(180deg,var(--ink-2),var(--ink));
+    background:var(--ink-2);
     border:1px solid var(--line);
-    border-radius:6px;
+    border-radius:8px;
     margin-top:34px;
     overflow:hidden;
+    box-shadow:0 2px 24px rgba(0,0,0,.06);
   }
 
   /* upload */
   .uploader{
-    padding:56px 28px;
+    padding:64px 32px;
     text-align:center;
   }
   .privacy{
@@ -99,7 +101,7 @@
   .privacy b{color:var(--gold-soft);font-weight:500}
 
   .drop{
-    border:1px dashed rgba(181,97,74,.4);
+    border:1px dashed rgba(232,160,168,.5);
     border-radius:4px;
     padding:46px 24px;
     max-width:460px;
@@ -109,7 +111,7 @@
   }
   .drop:hover,.drop:focus-visible,.drop.over{
     border-color:var(--gold);
-    background:rgba(181,97,74,.06);
+    background:rgba(232,160,168,.08);
     outline:none;
   }
   .drop .ring{
@@ -146,7 +148,7 @@
   .scan{
     position:absolute;left:0;right:0;height:2px;
     background:linear-gradient(90deg,transparent,var(--gold),transparent);
-    box-shadow:0 0 16px 2px rgba(181,97,74,.6);
+    box-shadow:0 0 16px 2px rgba(232,160,168,.7);
     top:0;opacity:0;
   }
   .scanning .scan{animation:scan 1.5s ease-in-out infinite;opacity:1}
@@ -162,14 +164,14 @@
     display:grid;place-items:center;
     font-size:15px;letter-spacing:.05em;
     line-height:1.25;text-align:center;
-    background:rgba(200,68,58,.07);
+    background:rgba(191,104,120,.07);
     transform:scale(0) rotate(-22deg);
     opacity:0;
   }
   .sealed .seal{animation:stamp .5s cubic-bezier(.2,1.4,.5,1) forwards}
   @keyframes stamp{to{transform:scale(1) rotate(-9deg);opacity:1}}
 
-  .reading{padding:34px 30px 30px}
+  .reading{padding:40px 36px 36px}
 
   .kicker{
     font-family:"M PLUS Rounded 1c",sans-serif;
@@ -189,7 +191,9 @@
     font-size:13px;color:var(--muted);
     border-top:1px solid var(--line);padding-top:14px;margin-top:10px;
   }
-  .from b{color:var(--gold-soft);font-weight:500}
+  .aura{display:flex;align-items:center;gap:10px;margin-top:16px;font-size:13px;color:var(--muted)}
+  .aura-swatch{width:20px;height:20px;border-radius:50%;flex-shrink:0;box-shadow:0 1px 5px rgba(0,0,0,.10)}
+  .aura-name{color:var(--ivory);font-weight:500}
 
   /* ---------- Paywall ---------- */
   .paywall{
@@ -214,7 +218,7 @@
   .lock-veil{
     position:absolute;inset:0;
     display:grid;place-items:center;
-    background:linear-gradient(180deg,rgba(242,237,229,.15),rgba(242,237,229,.88));
+    background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.92));
   }
   .lock-card{text-align:center;padding:0 20px}
   .lock-card .ic{font-size:28px;margin-bottom:8px}
@@ -232,7 +236,7 @@
     padding:22px 20px;background:var(--ink-2);
     display:flex;flex-direction:column;
   }
-  .plan.feature{border-color:var(--gold);box-shadow:0 0 0 1px rgba(181,97,74,.25) inset}
+  .plan.feature{border-color:var(--gold);box-shadow:0 0 0 1px rgba(232,160,168,.3) inset}
   .plan .tag{font-size:11px;letter-spacing:.2em;color:var(--gold);margin-bottom:10px}
   .plan h3{font-family:"M PLUS Rounded 1c",sans-serif;font-size:18px;margin-bottom:6px}
   .plan .price{font-family:"M PLUS Rounded 1c",sans-serif;font-size:30px;font-weight:800;margin-bottom:4px}
@@ -248,8 +252,8 @@
     transition:transform .1s, filter .2s;width:100%;
   }
   .btn:active{transform:translateY(1px)}
-  .btn-gold{background:linear-gradient(180deg,var(--gold-soft),var(--gold));color:#fff}
-  .btn-gold:hover{filter:brightness(1.06)}
+  .btn-gold{background:linear-gradient(180deg,var(--gold-soft),var(--gold));color:#3A2830}
+  .btn-gold:hover{filter:brightness(1.04)}
   .btn-shu{background:var(--shu);color:#fff}
   .btn-shu:hover{filter:brightness(1.08)}
   .btn:focus-visible{outline:2px solid var(--gold-soft);outline-offset:2px}
@@ -316,6 +320,9 @@
         <h2 class="trait" id="traitTitle"></h2>
         <p class="trait-body" id="traitBody"></p>
         <p class="overview" id="traitOverview"></p>
+        <div class="aura" id="auraBlock" style="display:none">
+          <span class="aura-swatch" id="auraSwatch"></span>今のあなたに足したい色：<span class="aura-name" id="auraName"></span>
+        </div>
       </div>
     </div>
 
@@ -484,9 +491,9 @@ function termToRegion(term){
 function drawMesh(ctx, lm, region){
   const du = new DrawingUtils(ctx);
   du.drawConnectors(lm, FaceLandmarker.FACE_LANDMARKS_TESSELATION,
-    { color:"rgba(201,162,39,0.18)", lineWidth:0.6 });
+    { color:"rgba(232,160,168,0.22)", lineWidth:0.6 });
 
-  const bright = { color:"rgba(226,199,102,0.95)", lineWidth:1.6 };
+  const bright = { color:"rgba(242,196,203,0.95)", lineWidth:1.6 };
   if(region==="eyes"){
     [FaceLandmarker.FACE_LANDMARKS_LEFT_EYE, FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE,
      FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW, FaceLandmarker.FACE_LANDMARKS_RIGHT_EYEBROW]
@@ -499,11 +506,50 @@ function drawMesh(ctx, lm, region){
 }
 
 /* ---------- 7. 結果の描画 ---------- */
+const AURA = {
+  "円相（丸顔）":          { hex:"#FFD0B8", name:"やわらかなアプリコット" },
+  "長相（面長）":          { hex:"#B8CCE8", name:"夜明け前のブルー" },
+  "離れ目":               { hex:"#FFF0A8", name:"まどろみのイエロー" },
+  "寄り目":               { hex:"#B8D8B8", name:"苔むすグリーン" },
+  "大目（だいもく）":      { hex:"#FFB8C8", name:"恋をするピンク" },
+  "細目（さいもく）":      { hex:"#CCC0E8", name:"夕暮れのラベンダー" },
+  "上がり目（つり目）":    { hex:"#FFC898", name:"燃えるオレンジ" },
+  "下がり目（たれ目）":    { hex:"#A8D8D0", name:"春の水色" },
+  "田宅宮が広い（離れ眉）":{ hex:"#B0E0D0", name:"深呼吸のミント" },
+  "田宅宮が狭い（詰まり眉）":{ hex:"#FFB8A8", name:"情熱のコーラル" },
+  "長眉":                 { hex:"#F5C0C8", name:"ふれあいのローズ" },
+  "短眉":                 { hex:"#E0D8C8", name:"凛としたオートミール" },
+  "アーチ眉":             { hex:"#F0B0D8", name:"ときめきのモーブ" },
+  "一文字眉":             { hex:"#B0C0D8", name:"誠実のネイビー" },
+  "長い鼻":               { hex:"#F0E0A0", name:"品のあるシャンパン" },
+  "短い鼻":               { hex:"#C0E8A8", name:"動き出すグリーン" },
+  "小鼻が張る（財帛宮）":  { hex:"#F0D080", name:"大地のゴールド" },
+  "小鼻が控えめ":          { hex:"#D0E8F0", name:"さざ波のブルー" },
+  "大きな口":             { hex:"#FFD0A0", name:"リードするオレンジ" },
+  "小さな口":             { hex:"#D8C8B8", name:"静寂のベージュ" },
+  "厚い唇":               { hex:"#FFD0D8", name:"ぬくもりのペタル" },
+  "薄い唇":               { hex:"#C0D8D0", name:"知性のミントグレー" },
+  "口角が上がる（仰月口）":{ hex:"#FFE8A0", name:"笑顔のサニーイエロー" },
+  "口角が結ばれる":        { hex:"#D8C0D8", name:"奥ゆかしいモーブ" },
+  "人中が長い":            { hex:"#E8C0A0", name:"熟成のテラコッタ" },
+  "人中が短い":            { hex:"#B0D8E8", name:"瑞々しいアクア" },
+  "地閣が豊か（エラ）":    { hex:"#B8C8B0", name:"しなやかなセージ" },
+  "シャープな顎":          { hex:"#D0C0D8", name:"洗練のライラック" },
+  "均整の取れた相":        { hex:"#B8D0E8", name:"信頼のスカイ" },
+  "個性的な相":            { hex:"#D8C0E8", name:"夢みるラベンダー" }
+};
+
 function renderReading(headline, overview){
   $("traitTerm").textContent = headline.term;
   $("traitTitle").innerHTML = `<span class="hl">${headline.title}</span>`;
   $("traitBody").textContent = headline.body;
   $("traitOverview").textContent = overview;
+  const a = AURA[headline.term];
+  if(a){
+    $("auraSwatch").style.background = a.hex;
+    $("auraName").textContent = a.name;
+    $("auraBlock").style.display = "flex";
+  }
 }
 
 function renderLocked(list){
@@ -534,6 +580,7 @@ $("restart").addEventListener("click", ()=>{
   $("paywall").style.display = "none";
   portrait.classList.remove("scanning","sealed");
   $("uploader").style.display = "block";
+  $("auraBlock").style.display = "none";
   fileInput.value = "";
   statusEl.classList.remove("err");
   statusEl.textContent = "準備ができました。顔写真を選んでください。";
