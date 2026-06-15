@@ -6,18 +6,18 @@
 <title>観相 — AI人相鑑定</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#0E1016;
-    --ink-2:#171B27;
-    --ink-3:#202637;
-    --gold:#C9A227;
-    --gold-soft:#E2C766;
-    --ivory:#F1EBDC;
-    --muted:#9A9282;
-    --shu:#C8443A;        /* 朱 — 印・CTA */
-    --line:rgba(201,162,39,0.22);
+    --ink:#FAFAF8;
+    --ink-2:#F2EDE5;
+    --ink-3:#EAE2D5;
+    --gold:#B5614A;
+    --gold-soft:#D4896E;
+    --ivory:#2E2420;
+    --muted:#8A7E76;
+    --shu:#C84B35;
+    --line:rgba(181,97,74,0.2);
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
@@ -25,7 +25,7 @@
   body{
     font-family:"Noto Sans JP",system-ui,sans-serif;
     background:
-      radial-gradient(1200px 700px at 50% -10%, #1a2032 0%, transparent 60%),
+      radial-gradient(1200px 700px at 50% -10%, #F0DDD4 0%, transparent 60%),
       var(--ink);
     color:var(--ivory);
     line-height:1.8;
@@ -42,7 +42,7 @@
     position:relative;
   }
   .eyebrow{
-    font-family:"Shippori Mincho",serif;
+    font-family:"M PLUS Rounded 1c",sans-serif;
     letter-spacing:.55em;
     font-size:13px;
     color:var(--gold);
@@ -50,20 +50,20 @@
     margin-bottom:22px;
   }
   h1.title{
-    font-family:"Shippori Mincho",serif;
+    font-family:"M PLUS Rounded 1c",sans-serif;
     font-weight:800;
     font-size:clamp(48px,11vw,92px);
     letter-spacing:.18em;
     line-height:1;
     padding-left:.18em;
-    background:linear-gradient(180deg,var(--gold-soft),var(--gold) 70%,#8c6f1a);
+    background:linear-gradient(180deg,var(--gold-soft),var(--gold) 70%,#7A2F1E);
     -webkit-background-clip:text;
     background-clip:text;
     color:transparent;
     margin-bottom:18px;
   }
   .lede{
-    font-family:"Shippori Mincho",serif;
+    font-family:"M PLUS Rounded 1c",sans-serif;
     font-size:clamp(15px,2.5vw,19px);
     color:var(--ivory);
     opacity:.82;
@@ -99,7 +99,7 @@
   .privacy b{color:var(--gold-soft);font-weight:500}
 
   .drop{
-    border:1px dashed rgba(201,162,39,.4);
+    border:1px dashed rgba(181,97,74,.4);
     border-radius:4px;
     padding:46px 24px;
     max-width:460px;
@@ -109,7 +109,7 @@
   }
   .drop:hover,.drop:focus-visible,.drop.over{
     border-color:var(--gold);
-    background:rgba(201,162,39,.05);
+    background:rgba(181,97,74,.06);
     outline:none;
   }
   .drop .ring{
@@ -119,7 +119,7 @@
     margin:0 auto 18px;
     color:var(--gold);font-size:26px;
   }
-  .drop h2{font-family:"Shippori Mincho",serif;font-weight:700;font-size:19px;letter-spacing:.04em;margin-bottom:6px}
+  .drop h2{font-family:"M PLUS Rounded 1c",sans-serif;font-weight:700;font-size:19px;letter-spacing:.04em;margin-bottom:6px}
   .drop p{font-size:13px;color:var(--muted)}
   input[type=file]{display:none}
 
@@ -133,7 +133,7 @@
 
   .portrait{
     position:relative;
-    background:#06070b;
+    background:#1C1512;
     border-right:1px solid var(--line);
     display:grid;place-items:center;
     min-height:340px;
@@ -146,7 +146,7 @@
   .scan{
     position:absolute;left:0;right:0;height:2px;
     background:linear-gradient(90deg,transparent,var(--gold),transparent);
-    box-shadow:0 0 16px 2px rgba(201,162,39,.6);
+    box-shadow:0 0 16px 2px rgba(181,97,74,.6);
     top:0;opacity:0;
   }
   .scanning .scan{animation:scan 1.5s ease-in-out infinite;opacity:1}
@@ -158,7 +158,7 @@
     width:74px;height:74px;border-radius:50%;
     border:2.5px solid var(--shu);
     color:var(--shu);
-    font-family:"Shippori Mincho",serif;font-weight:800;
+    font-family:"M PLUS Rounded 1c",sans-serif;font-weight:800;
     display:grid;place-items:center;
     font-size:15px;letter-spacing:.05em;
     line-height:1.25;text-align:center;
@@ -172,12 +172,12 @@
   .reading{padding:34px 30px 30px}
 
   .kicker{
-    font-family:"Shippori Mincho",serif;
+    font-family:"M PLUS Rounded 1c",sans-serif;
     color:var(--gold);letter-spacing:.3em;font-size:12px;
     padding-left:.3em;margin-bottom:14px;
   }
   .trait{
-    font-family:"Shippori Mincho",serif;
+    font-family:"M PLUS Rounded 1c",sans-serif;
     font-weight:800;
     font-size:clamp(26px,4.4vw,34px);
     line-height:1.35;
@@ -198,7 +198,7 @@
     position:relative;
   }
   .paywall .kicker{color:var(--shu)}
-  .pw-head{font-family:"Shippori Mincho",serif;font-weight:700;font-size:20px;line-height:1.5;margin-bottom:20px}
+  .pw-head{font-family:"M PLUS Rounded 1c",sans-serif;font-weight:700;font-size:20px;line-height:1.5;margin-bottom:20px}
 
   .locked{position:relative;border-radius:4px;overflow:hidden}
   .locked-inner{
@@ -207,18 +207,18 @@
     opacity:.75;
   }
   .weak{display:flex;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:4px;margin-bottom:12px;background:var(--ink-3)}
-  .weak .no{font-family:"Shippori Mincho",serif;color:var(--shu);font-weight:800;font-size:22px;line-height:1.2}
-  .weak h4{font-family:"Shippori Mincho",serif;font-size:16px;margin-bottom:4px}
+  .weak .no{font-family:"M PLUS Rounded 1c",sans-serif;color:var(--shu);font-weight:800;font-size:22px;line-height:1.2}
+  .weak h4{font-family:"M PLUS Rounded 1c",sans-serif;font-size:16px;margin-bottom:4px}
   .weak p{font-size:13.5px;color:var(--muted)}
 
   .lock-veil{
     position:absolute;inset:0;
     display:grid;place-items:center;
-    background:linear-gradient(180deg,rgba(14,16,22,.2),rgba(14,16,22,.78));
+    background:linear-gradient(180deg,rgba(242,237,229,.15),rgba(242,237,229,.88));
   }
   .lock-card{text-align:center;padding:0 20px}
   .lock-card .ic{font-size:28px;margin-bottom:8px}
-  .lock-card p{font-family:"Shippori Mincho",serif;font-size:15px;letter-spacing:.04em}
+  .lock-card p{font-family:"M PLUS Rounded 1c",sans-serif;font-size:15px;letter-spacing:.04em}
 
   /* ---------- Plans ---------- */
   .plans{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px}
@@ -228,23 +228,23 @@
     padding:22px 20px;background:var(--ink-2);
     display:flex;flex-direction:column;
   }
-  .plan.feature{border-color:var(--gold);box-shadow:0 0 0 1px rgba(201,162,39,.25) inset}
+  .plan.feature{border-color:var(--gold);box-shadow:0 0 0 1px rgba(181,97,74,.25) inset}
   .plan .tag{font-size:11px;letter-spacing:.2em;color:var(--gold);margin-bottom:10px}
-  .plan h3{font-family:"Shippori Mincho",serif;font-size:18px;margin-bottom:6px}
-  .plan .price{font-family:"Shippori Mincho",serif;font-size:30px;font-weight:800;margin-bottom:4px}
+  .plan h3{font-family:"M PLUS Rounded 1c",sans-serif;font-size:18px;margin-bottom:6px}
+  .plan .price{font-family:"M PLUS Rounded 1c",sans-serif;font-size:30px;font-weight:800;margin-bottom:4px}
   .plan .price small{font-size:13px;font-weight:500;color:var(--muted)}
   .plan ul{list-style:none;font-size:13px;color:var(--muted);margin:12px 0 20px;flex:1}
   .plan li{padding-left:18px;position:relative;margin-bottom:7px}
   .plan li::before{content:"—";position:absolute;left:0;color:var(--gold)}
 
   .btn{
-    font-family:"Shippori Mincho",serif;font-weight:700;
+    font-family:"M PLUS Rounded 1c",sans-serif;font-weight:700;
     border:none;border-radius:4px;cursor:pointer;
     padding:13px 18px;font-size:15px;letter-spacing:.05em;
     transition:transform .1s, filter .2s;width:100%;
   }
   .btn:active{transform:translateY(1px)}
-  .btn-gold{background:linear-gradient(180deg,var(--gold-soft),var(--gold));color:#241c00}
+  .btn-gold{background:linear-gradient(180deg,var(--gold-soft),var(--gold));color:#fff}
   .btn-gold:hover{filter:brightness(1.06)}
   .btn-shu{background:var(--shu);color:#fff}
   .btn-shu:hover{filter:brightness(1.08)}
@@ -258,7 +258,7 @@
   .modal-bg.show{display:grid}
   .modal{background:var(--ink-2);border:1px solid var(--gold);border-radius:6px;max-width:380px;padding:30px;text-align:center}
   .modal .ic{font-size:30px;color:var(--gold);margin-bottom:12px}
-  .modal h3{font-family:"Shippori Mincho",serif;font-size:20px;margin-bottom:12px}
+  .modal h3{font-family:"M PLUS Rounded 1c",sans-serif;font-size:20px;margin-bottom:12px}
   .modal p{font-size:13.5px;color:var(--muted);margin-bottom:8px}
   .modal .close{margin-top:18px;background:none;border:1px solid var(--line);color:var(--ivory);border-radius:4px;padding:10px 24px;cursor:pointer;font-family:"Noto Sans JP";width:auto}
   .modal .close:hover{border-color:var(--gold)}
